@@ -6,6 +6,7 @@
     <title>E-Monitoring Proyek - User</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <style>
       /* Custom CSS styles */
       * {
@@ -185,7 +186,23 @@
               <h5 class="card-title">Daftar Pemantauan Terbaru</h5>
             </div>
             <div class="card-body">
-              <table class="table table-striped">
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="date-range" class="form-label">Rentang Tanggal:</label>
+                  <input type="text" id="date-range" class="form-control" placeholder="Pilih rentang tanggal" />
+                </div>
+                <div class="col-md-4">
+                  <label for="sort-order" class="form-label">Urutan:</label>
+                  <select id="sort-order" class="form-select">
+                    <option value="desc">Terbaru</option>
+                    <option value="asc">Terlama</option>
+                  </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                  <button id="apply-filter" class="btn btn-primary">Terapkan Filter</button>
+                </div>
+              </div>
+              <table id="pemantauan-table" class="table table-striped">
                 <thead>
                   <tr>
                     <th>Tanggal</th>
@@ -195,24 +212,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>2023-06-01</td>
-                    <td>John Doe</td>
-                    <td>Ringan</td>
-                    <td><span class="badge bg-success">Selesai</span></td>
-                  </tr>
-                  <tr>
-                    <td>2023-05-30</td>
-                    <td>Jane Smith</td>
-                    <td>Sedang</td>
-                    <td><span class="badge bg-warning">Dalam Proses</span></td>
-                  </tr>
-                  <tr>
-                    <td>2023-05-29</td>
-                    <td>Bob Johnson</td>
-                    <td>Berat</td>
-                    <td><span class="badge bg-danger">Belum Diproses</span></td>
-                  </tr>
+                  <!-- Table rows will be dynamically populated -->
                 </tbody>
               </table>
             </div>
@@ -283,7 +283,73 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+      // Initialize Flatpickr for date range picker
+      flatpickr("#date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+      });
+
+      // Sample data for pemantauan
+      const pemantauanData = [
+        { date: "2023-06-01", user: "John Doe", category: "Ringan", status: "Selesai" },
+        { date: "2023-05-30", user: "Jane Smith", category: "Sedang", status: "Dalam Proses" },
+        { date: "2023-05-29", user: "Bob Johnson", category: "Berat", status: "Belum Diproses" },
+        // Add more data as needed
+      ];
+
+      function updateTable(data) {
+        const tableBody = document.querySelector("#pemantauan-table tbody");
+        tableBody.innerHTML = "";
+        data.forEach((item) => {
+          const row = `
+            <tr>
+              <td>${item.date}</td>
+              <td>${item.user}</td>
+              <td>${item.category}</td>
+              <td><span class="badge bg-${getStatusColor(item.status)}">${item.status}</span></td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
+      }
+
+      function getStatusColor(status) {
+        switch (status) {
+          case "Selesai":
+            return "success";
+          case "Dalam Proses":
+            return "warning";
+          case "Belum Diproses":
+            return "danger";
+          default:
+            return "secondary";
+        }
+      }
+
+      function applyFilter() {
+        const dateRange = document.getElementById("date-range").value;
+        const sortOrder = document.getElementById("sort-order").value;
+        let filteredData = [...pemantauanData];
+
+        if (dateRange) {
+          const [startDate, endDate] = dateRange.split(" to ");
+          filteredData = filteredData.filter((item) => item.date >= startDate && item.date <= (endDate || startDate));
+        }
+
+        filteredData.sort((a, b) => {
+          return sortOrder === "asc" ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
+        });
+
+        updateTable(filteredData);
+      }
+
+      document.getElementById("apply-filter").addEventListener("click", applyFilter);
+
+      // Initial table population
+      updateTable(pemantauanData);
+
       const sidebarLinks = document.querySelectorAll(".sidebar-nav a");
       const sections = document.querySelectorAll("section");
       const sidebar = document.querySelector(".sidebar");
