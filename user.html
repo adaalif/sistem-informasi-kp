@@ -107,8 +107,9 @@
           <li><a href="#">Form Pemantauan</a></li>
         </ul>
         <div class="mt-auto">
-          <button class="btn btn-danger">Logout</button>
+          <a href="logout.html" class="btn btn-danger">Logout</a>
         </div>
+
         <div class="mt-4 text-muted">
           <small>&copy; 2023 E-Monitoring Proyek</small>
         </div>
@@ -368,6 +369,12 @@
       navbarToggler.addEventListener("click", () => {
         sidebar.classList.toggle("show");
       });
+
+      // fungsi logout
+      function logout() {
+        // Perform any necessary logout actions (e.g., clearing session storage)
+        window.location.href = "logout.html";
+      }
     </script>
   </body>
 </html>
